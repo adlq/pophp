@@ -1,5 +1,6 @@
 <?php
 require_once("POParser.php");
+require_once("POEntry.php");
 
 class POFile 
 {
@@ -7,14 +8,8 @@ class POFile
 	
 	public function __construct($file)
 	{
-		$this->entries = POParser::parse($file);
-		foreach($this->entries as $id => $entry) 
-		{
-			if ($entry->getSource() === "")
-			{
-				unset($this->entries[$id]);
-			}
-		}
+		$parser = new POParser();
+		$this->entries = $parser->parse($file);
 	}
 
     public function getEntries($files = array())
@@ -52,76 +47,9 @@ class POFile
 		$entries = empty($entries) ? $this->entries : $entries;
         foreach ($this->entries as $entry)
         {
-            // Display comments first
-            $comments = $entry->getComments();            
-            foreach ($comments as $type => $comment) 
-            {
-                // Display comments
-                switch ($type)
-                {
-                    case "translator":
-                        foreach ($comment as $translatorComment)
-                        {
-                            echo "# $translatorComment\n";
-                        }
-                        break;
-                    case "extracted":
-                        echo "#. $comment\n";
-                        break;
-                    case "reference":
-                        foreach ($comment as $ref)
-                        {
-                            echo "#: $ref\n";
-                        }
-                        break;
-                    case "flag":
-                        echo "#, $comment\n";
-                        break;
-                    default:
-                        echo "#| $comment\n";
-                        break;
-                }
-            }
-
-            // Context
-            $context = $entry->getContext();
-            if ($context != "") 
-                echo "msgctxt \"" . $context . "\"\n";
-
-            // msgid
-            $source = $entry->getSource();
-            $this->displayWithLineBreak($source);
-
-            // msgstr 
-            $target = $entry->getTarget();
-            $this->displayWithLineBreak($target);
-
-            echo "\n";
+			$entry->display();
         }
     }
-
-    private function displayWithLineBreak($str)
-    {
-	
-        $offset = 0;
-        $break = strpos($str, '\n', $offset) != false;
-        echo "msgstr ";
-        if ($break == false)
-        {
-            echo "\"$str\"\n";
-        }
-        else 
-        {
-            
-            while ($break != false)
-            {
-                $break = strpos($str, '\n', $offset);
-                echo "\"" . substr($str, $offset, $break - $offset) . '\n' . "\"\n";
-                $padding = strlen('\n');
-                $offset = $break + $padding > strlen($str) ? strlen($target) - 1 : $break + $padding; 
-            }
-        }
-    } 
 	
 	public function getSourceStrings($files = array())
 	{
@@ -129,47 +57,80 @@ class POFile
 		$sourceStrings = array();
 		foreach ($entries as $entry) 
 		{
-			array_push($sourceStrings, $entry->getSource());
+			if ($entry->getSource() !== '')
+                array_push($sourceStrings, $entry->getSource());
 		}
 		return $sourceStrings;
 	}
 
 	public function getFuzzyStrings()
 	{
-		$result = array();
+		$entries = $this->getEntries();
+		$fuzzyStrings = array();
 		
-		foreach ($this->entries as $entry)
+		foreach ($entries as $entry)
 		{
 			$comments = $entry->getComments();
 			if (!empty($comments))
 			{
-				
 				if (array_key_exists('flag', $comments))
 				{
 					foreach ($comments['flag'] as $flag)
 					{
 						if (trim($flag) == 'fuzzy')
-							array_push($result, $entry->getSource());
+							array_push($fuzzyStrings, $entry->getSource());
 					}
 				}
 			}
 		}
-		return $result;
+		return $fuzzyStrings;
 	}
 	
 	public function getUntranslatedStrings()
 	{
-		$result = array();
+		$entries = $this->getEntries();
+		$untranslatedStrings = array();
 		
-		foreach ($this->entries as $entry)
+		foreach ($entries as $entry)
 		{
-			if ($entry->getTarget() === "")
+			if (!$entry->isTranslated())
 			{
-				array_push($result, $entry->getSource());
+				array_push($untranslatedStrings, $entry->getSource());
 			}
 		}
 		
-		return $result;
+		return $untranslatedStrings;
+	}
+	
+	public function getTranslatedEntries()
+	{
+		$entries = $this->getEntries();
+		$translatedStrings = array();
+		
+		foreach ($entries as $entry)
+		{
+			if ($entry->isTranslated())
+			{
+				array_push($translatedStrings, $entry);
+			}
+		}
+		
+		return $translatedStrings;
+	}
+	
+	public function getTranslation($str)
+	{
+		$entries = $this->getEntries();
+		
+		foreach($entries as $entry)
+		{
+			if ($entry->getSource() === $str && $entry->isTranslated())
+			{
+				return $entry->getTarget();
+			}
+		}
+		
+		return null;
 	}
 }
 
