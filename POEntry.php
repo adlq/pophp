@@ -6,52 +6,100 @@ class POEntry
 	private $context;
 	private $source;
 	private $target;
-	private $isWrapped;
 	
-	public function __construct($source, $target, $context = "", $comments = array(), $isWrapped = false)
+	/**
+	 * Constructor method
+	 * @param	$source		Source string (msgid)
+	 *			$target		Target string (msgstr)
+	 *			$context	(Optional) The entry's context (msgctxt)
+	 *			$comments	(Optional) An array containing the entry's comments (#...)
+	 */
+	public function __construct($source, $target, $context = "", $comments = array())
 	{
 		$this->comments = $comments;
 		$this->context = $context;
 		$this->source = $source;
 		$this->target = $target;
-		$this->isWrapped = $isWrapped;
-	}	
-
-	public function isWrapped()
-	{
-		return $this->isWrapped;
 	}
-	
+
+	/**
+	 * Retrieve the translated state of an entry
+	 *
+	 * @return	True is the entry is translated, False otherwise
+	 */
 	public function isTranslated()
 	{
 		return ($this->getTarget() !== '');
 	}
 	
+	/**
+	 * Retrieve the fuzzy state of an entry
+	 *
+	 * @return True if the entry is fuzzy, False otherwise
+	 */
+	public function isFuzzy()
+	{
+		// Extract the comments from each entry
+		$comments = $this->getComments();
+		if (!empty($comments))
+		{
+			// The fuzzy status is specified amongst the flags
+			if (array_key_exists('flag', $comments))
+			{
+				// Examine each flag
+				foreach ($comments['flag'] as $flag)
+				{
+					if (trim($flag) == 'fuzzy')
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Retrieve the comments associated to an entry
+	 *
+	 * @return	An array containing the entry's comments
+	 */
     public function getComments()
     {
         return $this->comments;
     }
 
+	/**
+	 * Retrieve an entry's context
+	 *
+	 * @return	The entry's context, in string format
+	 */
     public function getContext()
     {
         return $this->context;
     }
 
+	/**
+	 * Retrieve the source string (msgid) of an entry
+	 *
+	 * @return	The msgid, in string format
+	 */
     public function getSource()
     {
         return $this->source;
     }
 
+	/**
+	 * Retrieve the target string (msgstr) of an entry
+	 *
+	 * @return	The msgstr, in string format
+	 */
     public function getTarget()
     {
         return $this->target;
     }
 	
-	public function __toString()
-	{
-		return $this->getSource() . " => " . $this->getTarget();
-	}
-	
+	/**
+	 * Display the entry, in standard gettext format
+	 */
 	public function display() 
 	{
 		// Display comments first
@@ -111,10 +159,6 @@ class POEntry
 		// msgid
 		$source = $this->getSource();
 		echo 'msgid ';
-		if ($this->isWrapped())
-		{
-			echo "\"\"\n";
-		} 
 		$this->displayWithLineBreak($source);
 
 		// msgstr 
@@ -122,10 +166,6 @@ class POEntry
 		echo 'msgstr ';
 		if ($this->isTranslated())
 		{
-			if ($this->isWrapped()) 
-			{
-				echo "\"\"\n";
-			}
 			$this->displayWithLineBreak($target);
 		} 
 		else 
