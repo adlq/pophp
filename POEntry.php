@@ -6,24 +6,47 @@ class POEntry
 	private $context;
 	private $source;
 	private $target;
+  private $state;
+  private $isFuzzy;
 	
-	/**
-	 * Constructor method
-	 * @param	$source		Source string (msgid)
-	 *			$target		Target string (msgstr)
-	 *			$context	(Optional) The entry's context (msgctxt)
-	 *			$comments	(Optional) An array containing the entry's comments (#...)
-	 */
+  /**
+   * Constructor method
+   * @param string  $source   Source string (msgid)
+   * @param string  $target   Target string (msgstr)
+   * @param string  $context  The entry's context (msgctxt)
+   * @param array   $comments An array containing the entry's comments
+   */
 	public function __construct($source, $target, $context = "", $comments = array())
 	{
 		$this->comments = $comments;
+
+		// Extract the translation state from the comment
+    $this->isFuzzy = false;
+		// Extract the comments from each entry
+		if (!empty($comments))
+		{
+			// The fuzzy status is specified amongst the flags
+			if (array_key_exists('flag', $comments))
+			{
+				// Examine each flag
+				foreach ($comments['flag'] as $flag)
+				{
+					if (trim($flag) == 'fuzzy')
+					{
+            $this->isFuzzy = true;
+            break;
+          }
+				}
+			}
+		}
+
 		$this->context = $context;
 		$this->source = $source;
 		$this->target = $target;
 	}
 
 	/**
-	 * Retrieve the translated state of an entry
+	 * Does this entry have a translation? (fuzzy or not)
 	 *
 	 * @return	True is the entry is translated, False otherwise
 	 */
@@ -39,22 +62,7 @@ class POEntry
 	 */
 	public function isFuzzy()
 	{
-		// Extract the comments from each entry
-		$comments = $this->getComments();
-		if (!empty($comments))
-		{
-			// The fuzzy status is specified amongst the flags
-			if (array_key_exists('flag', $comments))
-			{
-				// Examine each flag
-				foreach ($comments['flag'] as $flag)
-				{
-					if (trim($flag) == 'fuzzy')
-						return true;
-				}
-			}
-		}
-		return false;
+    return $this->isFuzzy;
 	}
 	
 	/**

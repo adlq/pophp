@@ -1,0 +1,7 @@
+<phpunit>
+  <testsuites>
+    <testsuite name="po-php-tools">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
