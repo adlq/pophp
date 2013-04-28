@@ -1,4 +1,4 @@
-Simple PHP PO Parser
-====================
+PHP toolkit for PO files
+========================
 
-Title says it all, still under heavy development though.
+This is a simple library to parse and play with PO files. Still under heavey development
