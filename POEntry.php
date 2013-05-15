@@ -6,8 +6,7 @@ class POEntry
 	private $context;
 	private $source;
 	private $target;
-  private $state;
-  private $isFuzzy;
+	private $isFuzzy;
 	
   /**
    * Constructor method
@@ -21,7 +20,7 @@ class POEntry
 		$this->comments = $comments;
 
 		// Extract the translation state from the comment
-    $this->isFuzzy = false;
+		$this->isFuzzy = false;
 		// Extract the comments from each entry
 		if (!empty($comments))
 		{

@@ -23,13 +23,14 @@ class POFile
 	 * 
 	 * @param	$fromFiles	(Optional) Parameter to filter the entries 
 	 *			with respect to the files they come from
+	 * @param string $rootFolder The root folder of the original files
 	 * @return	An array containing the PO/POT file's entries
 	 */
-    public function getEntries($fromFiles = array())
+    public function getEntries($fromFiles = array(), $rootFolder = '')
     {
 		$result = array();
 
-		if (!empty($fromFiles)) 
+		if (!empty($fromFiles) && $rootFolder !== '') 
 		{
 			foreach ($this->entries as $entry) 
 			{
@@ -42,15 +43,18 @@ class POFile
 					foreach ($comments["reference"] as $reference)
 					{
 						// Retrieve the referenced file path
-						if (preg_match("/(.+):/", $reference, $match))
+						if (preg_match("/.+\\\\$rootFolder\\\\(.+):/", $reference, $match))
 						{
-							$referencePath = $match[1];
-							// If the file is included in the filter, we keep the string
-							if (in_array($referencePath, $fromFiles))
+							if (isset($match[1]))
 							{
-								array_push($result, $entry);
-								// Break out of foreach
-								break;
+								$referencePath = $match[1];
+								// If the file is included in the filter, we keep the string
+								if (in_array($referencePath, $fromFiles))
+								{
+									array_push($result, $entry);
+									// Break out of foreach
+									break;
+								}
 							}
 						}
 					}
@@ -70,9 +74,9 @@ class POFile
 	 *			with respect to the files they come from
 	 * @return 	the file's source strings
 	 */
-	public function getSourceStrings($fromFiles = array())
+	public function getSourceStrings($fromFiles = array(), $rootFolder = '')
 	{
-		$entries = $this->getEntries($fromFiles);
+		$entries = $this->getEntries($fromFiles, $rootFolder);
 		$sourceStrings = array();
 		foreach ($entries as $entry) 
 		{

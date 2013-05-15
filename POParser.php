@@ -142,7 +142,7 @@ class POParser
 						break;
 					case ":":
 						// Reference
-						$this->feedCommentBuffer('reference', trim(str_replace('\\', '/', substr($match[1], 2))));
+						$this->feedCommentBuffer('reference', trim(substr($match[1], 2)));
 						break;
 					case ",":
 						// Flags
