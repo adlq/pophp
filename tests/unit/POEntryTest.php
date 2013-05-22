@@ -12,16 +12,6 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 	{
 		$this->entry = new POEntry('source', 'target');
 	}
-  /**
-   * @covers 
-   */
-	public function testHasRightAttributes()
-	{
-		$this->assertClassHasAttribute('source', 'POEntry');
-		$this->assertClassHasAttribute('target', 'POEntry');
-		$this->assertClassHasAttribute('context', 'POEntry');
-		$this->assertClassHasAttribute('comments', 'POEntry');
-	}
 	
   /**
    * @covers POEntry::__constructor
@@ -34,8 +24,7 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 	}
 	
 	/**
-	 * 
-	 * @depends testNewEntry
+	 * @covers POEntry::extractRelevantPath
 	 */
 	public function testExtractRelevantPath()
 	{
@@ -56,8 +45,12 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 				->extractRelevantReference('C:\fooz\baz\foom\foo\bar\foobar.php:321', 'foob'));
 	}
 	
+	/**
+	 * @covers POEntry::getReferences
+	 */
 	public function testGetReferences()
 	{
+		// Unix folder delimiter
 		$this->entry->comments = array(
 			'reference' => array(
 				'/fooz/baz/foom/foo/bar/foobar1.php:123',
@@ -72,6 +65,7 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 			'foo/bar/foobar2.php:134'
 		), $this->entry->getReferences('foom'));
 		
+		// Win folder delimiter
 		$this->entry->comments = array(
 			'reference' => array(
 				'C:\fooz\baz\foom\foo\bar\foobar1.php:321',
@@ -85,6 +79,11 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 			'foo\bar\foobar2.php:31',
 			'foo\bar\foobar2.php:34'
 		), $this->entry->getReferences('foom'));
+		
+		// No references
+		$this->entry->comments = array('reference' => array());
+		
+		$this->assertEmpty($this->entry->getReferences('foo'));
 	}
 }
 

@@ -55,8 +55,8 @@ class POFile
 						}
 					}
 				}
+				return $result;
 			}
-			return $result;
 		
 			// If there's no filter, return all the entries
 			return $this->entries;
