@@ -28,22 +28,18 @@ class POFile
 	 */
     public function getEntries($fromFiles = array(), $rootFolder = '')
     {
-		$result = array();
+			$result = array();
+			$match = array();
 
-		if (!empty($fromFiles) && $rootFolder !== '') 
-		{
-			foreach ($this->entries as $entry) 
+			if (!empty($fromFiles) && $rootFolder !== '') 
 			{
-				// Extract the comments from each entry
-				$comments = $entry->getComments();
-				// If there's reference information 
-				if (array_key_exists("reference", $comments))
+				foreach ($this->entries as $entry) 
 				{
-					// Loop over all the references
-					foreach ($comments["reference"] as $reference)
+
+					foreach ($entry->getReferences($rootFolder) as $reference)
 					{
 						// Retrieve the referenced file path
-						if (preg_match("/.+\\\\$rootFolder\\\\(.+):/", $reference, $match))
+						if (preg_match("/(.+):/", $reference, $match))
 						{
 							if (isset($match[1]))
 							{
@@ -61,10 +57,9 @@ class POFile
 				}
 			}
 			return $result;
-		}
 		
-		// If there's no filter, return all the entries
-        return $this->entries;
+			// If there's no filter, return all the entries
+			return $this->entries;
     }
 
 	/**
