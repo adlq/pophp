@@ -72,7 +72,7 @@ class POEntry
 	 */
 	public function getComments()
 	{
-			return $this->comments;
+		return $this->comments;
 	}
 
 	/**
@@ -82,7 +82,7 @@ class POEntry
 	 */
 	public function getContext()
 	{
-			return $this->context;
+		return $this->context;
 	}
 
 	/**
@@ -92,7 +92,12 @@ class POEntry
 	 */
 	public function getSource()
 	{
-			return $this->source;
+		return $this->source;
+	}
+	
+	public function setTarget($target)
+	{
+		$this->target = $target;
 	}
 
 	/**
@@ -230,58 +235,12 @@ class POEntry
 
 		// msgid
 		$source = $this->getSource();
-		echo 'msgid ';
-		$this->displayWithLineBreak($source);
+		echo "msgid \"$source\"\n";
 
 		// msgstr 
 		$target = $this->getTarget();
-		echo 'msgstr ';
-		if ($this->isTranslated())
-		{
-			$this->displayWithLineBreak($target);
-		} 
-		else 
-		{
-			echo "\"\"\n";
-		}
-		echo "\n";
+		echo "msgstr \"$target\"\n";
 	}
-	
-	
-	private function displayWithLineBreak($str)
-	{
-		// Only perform this if the string is not empty
-		if ($str !== '')
-		{
-			// Offset to be used with strpos
-			$offset = 0;
-
-			// Find first occurence of line break in the string
-			$break = strpos($str, '\n', $offset) !== false;
-
-			// If there is no line break, simply print out the string
-			if ($break == false)
-			{
-				echo "\"$str\"\n";
-			}
-			else 
-			{
-				// Otherwise, we break lines till there are no more to break
-				while ($break !== false)
-				{
-					$break = strpos($str, '\n', $offset);
-					if ($break !== false)
-					{
-						echo "\"" . substr($str, $offset, $break - $offset) . '\n' . "\"\n";
-						$padding = strlen('\n');
-						$offset = $break + $padding > strlen($str) ? strlen($target) - 1 : $break + $padding; 
-					}
-				}
-				if ($offset !== strlen($str))
-					echo "\"" . substr($str, $offset) . "\"\n";
-			}
-		}
-	} 
 }
 
 ?>

@@ -207,13 +207,16 @@ class POParser
 				/**
 				 * This happens when 
 				 */
-				if ($this->getState() === self::STATE_MSGID)
+				if (isset($match[1]))
 				{
-					$this->feedSourceStringBuffer($match[1]);
-				}
-				else if ($this->getState() === self::STATE_MSGSTR)
-				{
-					$this->feedTargetStringBuffer($match[1]);
+					if ($this->getState() === self::STATE_MSGID)
+					{
+						$this->feedSourceStringBuffer($match[1]);
+					}
+					else if ($this->getState() === self::STATE_MSGSTR)
+					{
+						$this->feedTargetStringBuffer($match[1]);
+					}
 				}
 			}
 			else
