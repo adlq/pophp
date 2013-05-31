@@ -5,17 +5,22 @@ require_once("POEntry.php");
 class POFile 
 {
 	private $entries;
+	public $entriesHash;
 	
 	/**
 	 * Constructor method
 	 * 
 	 * @param	$file	the PO/POT file to construct from
 	 */
-	
 	public function __construct($file)
 	{
 		$parser = new POParser();
 		$this->entries = $parser->parse($file);
+		
+		foreach ($this->entries as $id => $entry)
+		{
+			$this->entriesHash[$entry->getSource()] = $id;
+		}
 	}
 
 	/**
@@ -141,7 +146,18 @@ class POFile
 		
 		return $translatedStrings;
 	}
-
+	
+	/**
+	 * Returns a PO entry, given its source string (msgid)
+	 * 
+	 * @param string $src The source string
+	 * @return POEntry The corresponding PO entry
+	 */
+	public function getEntryBySource($src)
+	{
+		return $this->entries[$this->entriesHash[$src]];
+	}
+	
 	/**
 	 * Retrieve the translation for a specified source string (or msgid)
 	 * 
@@ -151,17 +167,7 @@ class POFile
 	 */	
 	public function getTranslation($str)
 	{
-		$entries = $this->getTranslatedEntries();
-		
-		foreach($entries as $entry)
-		{
-			if ($entry->getSource() === $str)
-			{
-				return $entry->getTarget();
-			}
-		}
-		
-		return null;
+		return $this->getEntryBySource($str)->getTarget();
 	}
 	
 	
