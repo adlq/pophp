@@ -253,5 +253,3 @@ class POEntry
 		return $this->hash;
 	}
 }
-
-?>
