@@ -8,20 +8,22 @@ $file2 = $argv[2];
 $pofile1 = new POFile($file1);
 $pofile2 = new POFile($file2);
 
-// Get the appropriate old and new strings
-$sources1 = $pofile1->getSourceStrings();
-$sources2 = $pofile2->getSourceStrings();
-
 // Compare both string arrays and retrieve the missing strings as well as the obsolete ones
-$strings1not2 = compareStringArrays($sources2, $sources1);
-$strings2not1 = compareStringArrays($sources1, $sources2);
+$strings1not2 = compareEntries($pofile2, $pofile1);
+$strings2not1 = compareEntries($pofile1, $pofile2);
+
+displayStats("# of strings in $file1", count($pofile1->getEntries()));
+displayStats("# of strings in $file2", count($pofile2->getEntries()));
+
+$strings1not2Count = count($strings1not2);
+$strings2not1Count = count($strings2not1);
 
 // Output different things 
-displayStats("In $file1 but not in $file2", 0);
-displayStringArray($strings1not2);
+displayStats("In $file1 but not in $file2", $strings1not2Count);
+displayEntryArray($strings1not2);
 
-displayStats("In $file2 but not in $file1", 0);
-displayStringArray($strings2not1);
+displayStats("In $file2 but not in $file1", $strings2not1Count);
+displayEntryArray($strings2not1);
 
 /**
  * Take one reference array and another array to compare to,
@@ -31,16 +33,14 @@ displayStringArray($strings2not1);
  *			$array		the array to compare it to
  * @return	the strings from $array that are not included in $refArray
  */
-function compareStringArrays($refArray, $array)
+function compareEntries($file1, $file2)
 {
 	$diffArray = array();
 	
-	foreach ($array as $el) 
+	foreach ($file1->getEntries() as $entry) 
 	{
-		if (!in_array($el, $refArray))
-		{
-			array_push($diffArray, $el);
-		}
+		if (!$file2->getEntry($entry))
+			array_push($diffArray, $entry);
 	}
 	
 	return $diffArray;
@@ -51,11 +51,11 @@ function compareStringArrays($refArray, $array)
  *
  * @param	$stringArray	The string array to be displayed
  */
-function displayStringArray($stringArray)
+function displayEntryArray($entryArray)
 {
-	foreach ($stringArray as $string)
+	foreach ($entryArray as $entry)
 	{
-		echo "\t- \"$string\"\n";
+		echo "\t- \"" . $entry->getSource() . "\"\n";
 	}
 }
 
@@ -68,6 +68,6 @@ function displayStringArray($stringArray)
  */
 function displayStats($msg, $stat)
 {
-	echo "\n$msg: $stat\n\n";
+	echo "\n$msg: $stat\n\n-----\n\n";
 }
 ?>

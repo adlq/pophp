@@ -7,6 +7,7 @@ class POEntry
 	private $source;
 	private $target;
 	private $isFuzzy;
+	private $hash;
 	
   /**
    * Constructor method
@@ -15,7 +16,7 @@ class POEntry
    * @param string  $context  The entry's context (msgctxt)
    * @param array   $comments An array containing the entry's comments
    */
-	public function __construct($source, $target, $context = "", $comments = array())
+	public function __construct($source, $target, $context = '', $comments = array())
 	{
 		$this->comments = $comments;
 
@@ -43,6 +44,7 @@ class POEntry
 		$this->context = $context;
 		$this->source = $source;
 		$this->target = $target;
+		$this->hash = hash('sha256', $context . $source);
 	}
 
 	/**
@@ -240,6 +242,15 @@ class POEntry
 		// msgstr 
 		$target = $this->getTarget();
 		echo "msgstr \"$target\"\n";
+	}
+	
+	/**
+	 * Retrieve the entry's hash
+	 * @return string This entry's hash
+	 */
+	public function getHash()
+	{
+		return $this->hash;
 	}
 }
 

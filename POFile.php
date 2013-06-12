@@ -5,21 +5,30 @@ require_once("POEntry.php");
 class POFile 
 {
 	private $entries;
-	public $entriesHash;
+	private $entryHash;
 	
 	/**
 	 * Constructor method
 	 * 
 	 * @param	$file	the PO/POT file to construct from
 	 */
-	public function __construct($file)
+	public function __construct($file = '')
 	{
-		$parser = new POParser();
-		$this->entries = $parser->parse($file);
-		
-		foreach ($this->entries as $id => $entry)
+		if ($file !== '')
 		{
-			$this->entriesHash[$entry->getSource()] = $id;
+			$parser = new POParser();
+			$this->entries = $parser->parse($file);
+
+			foreach ($this->entries as $id => $entry)
+			{
+				// Do not forget to include msgctxt as an unique identifier together
+				// with msgid
+				$this->entryHash[$entry->getHash()] = $id;
+			}
+		}
+		else
+		{
+			$this->entries = array();
 		}
 	}
 
@@ -81,7 +90,7 @@ class POFile
 		foreach ($entries as $entry) 
 		{
 			if ($entry->getSource() !== '')
-                array_push($sourceStrings, $entry->getSource());
+				array_push($sourceStrings, $entry->getSource());
 		}
 		return $sourceStrings;
 	}
@@ -148,28 +157,53 @@ class POFile
 	}
 	
 	/**
-	 * Returns a PO entry, given its source string (msgid)
+	 * Attempt to retrieve a gettext entry.
 	 * 
-	 * @param string $src The source string
-	 * @return POEntry The corresponding PO entry
+	 * @param mixed $query The source string (msgid) or a POEntry object
+	 * @param string $context (Optionnal) The context (msgctxt)
+	 * @return mixed POEntry if the corresponding PO entry is found,
+	 * False otherwise
 	 */
-	public function getEntryBySource($src)
+	public function getEntry($query, $context = '')
 	{
-		return $this->entries[$this->entriesHash[$src]];
+		// If the query is not a POEntry, we create a temp object to 
+		// retrieve its hash
+		if (gettype($query) === "object" && get_class($query) === 'POEntry')
+		{
+			$temp = $query;
+		}
+		else
+		{
+			// Create a temp entry to calculate the hash key we're looking for
+			$temp = new POEntry($query, '', $context);
+		}
+		
+		$key = $temp->getHash();
+		
+		if (array_key_exists($key, $this->entryHash))
+			return $this->entries[$this->entryHash[$key]];
+		return false;
 	}
 	
 	/**
 	 * Retrieve the translation for a specified source string (or msgid)
 	 * 
-	 * @param	$str 	The msgid string
-	 * @return	null if the string is not translated, 
-	 *			its translation otherwise
+	 * @param	string $str The msgid string
+	 * @return mixed False if the string is not translated, 
+	 * its translation (string) otherwise
 	 */	
-	public function getTranslation($str)
+	public function getTranslation($str, $context = '')
 	{
-		return $this->getEntryBySource($str)->getTarget();
+		$entry = $this->getEntryBySource($str, $context);
+		if ($entry !== false)
+			return $entry->getTarget();
+		return false;
 	}
 	
+	public function getEntryHash()
+	{
+		return $this->entryHash;
+	}
 	
 	/**
 	 * Output a raw representation of the PO/POT file or 
@@ -177,17 +211,16 @@ class POFile
 	 * 
 	 * @param	$entries	(Optional) The entries to output
 	 */
-    public function display($entries = array())
-    {
-		// If no entries are specified as parameter, display all of them
-		$entries = empty($entries) ? $this->entries : $entries;
-        foreach ($this->entries as $entry)
-        {
-			// Call the display() method of each entry
-			$entry->display();
-        }
-    }
-	
+	public function display($entries = array())
+	{
+	// If no entries are specified as parameter, display all of them
+	$entries = empty($entries) ? $this->entries : $entries;
+			foreach ($this->entries as $entry)
+			{
+		// Call the display() method of each entry
+		$entry->display();
+			}
+	}
 }
 
 ?>
