@@ -213,7 +213,7 @@ class POFile
 	 */	
 	public function getTranslation($str, $context = '')
 	{
-		$entry = $this->getEntryBySource($str, $context);
+		$entry = $this->getEntry($str, $context);
 		if ($entry !== false)
 			return $entry->getTarget();
 		return false;
