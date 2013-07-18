@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 Copyright 2013 Duong Tuan Nghia
 
 This file is part of Pophp.
@@ -32,13 +32,17 @@ displayStats("# of strings in $file2", $diff['secondMsgCount']);
 
 $strings1not2Count = count($diff['firstOnly']);
 $strings2not1Count = count($diff['secondOnly']);
+$commonCount = count($diff['common']);
 
-// Output different things 
+// Output different things
 displayStats("In $file1 but not in $file2", $strings1not2Count);
 displayEntryArray($diff['firstOnly']);
 
 displayStats("In $file2 but not in $file1", $strings2not1Count);
 displayEntryArray($diff['secondOnly']);
+
+displayStats("In both files", $commonCount);
+displayEntryArray($diff['common']);
 
 /**
  * Appropriately display a string array in TortoiseHg's output log
@@ -49,7 +53,12 @@ function displayEntryArray($entryArray)
 {
 	foreach ($entryArray as $entry)
 	{
-		echo "\t- \"" . $entry->getSource() . "\"\n";
+		echo "\t- \"" . $entry->getSource() . "\" found in: \n";
+		foreach($entry->getReferences('source') as $ref)
+		{
+			echo "\t\t+ $ref\n";
+		}
+		echo "\n";
 	}
 }
 

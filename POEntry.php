@@ -1,5 +1,5 @@
-<?php 
-/* 
+<?php
+/*
 Copyright 2013 Duong Tuan Nghia
 
 This file is part of Pophp.
@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with Pophp.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-class POEntry 
+class POEntry
 {
 	public $comments;
 	private $context;
@@ -26,7 +26,7 @@ class POEntry
 	private $target;
 	private $isFuzzy;
 	private $hash;
-	
+
   /**
    * Constructor method
    * @param string  $source   Source string (msgid)
@@ -39,7 +39,7 @@ class POEntry
 		$this->comments = $comments;
 
 		$this->isFuzzy = false;
-		
+
 		// Extract the comments from each entry
 		if (!empty($comments))
 		{
@@ -74,7 +74,7 @@ class POEntry
 	{
 		return ($this->getTarget() !== '');
 	}
-	
+
 	/**
 	 * Retrieve the fuzzy state of an entry
 	 *
@@ -84,7 +84,7 @@ class POEntry
 	{
     return $this->isFuzzy;
 	}
-	
+
 	/**
 	 * Retrieve the comments associated to an entry
 	 *
@@ -114,11 +114,6 @@ class POEntry
 	{
 		return $this->source;
 	}
-	
-	public function setTarget($target)
-	{
-		$this->target = $target;
-	}
 
 	/**
 	 * Retrieve the target string (msgstr) of an entry
@@ -129,23 +124,33 @@ class POEntry
 	{
 			return $this->target;
 	}
-		
+
+	/**
+	 * Modified the target string
+	 *
+	 * @param string $target The new target string
+	 */
+	public function setTarget($target)
+	{
+		$this->target = $target;
+	}
+
 	/**
 	 * Retrieve the list of references for an entry
-	 * 
-	 * @param string $rootFolder The root folder 
+	 *
+	 * @param string $rootFolder The root folder
 	 * @return array The list of references for the entry
 	 */
 	public function getReferences($folder)
 	{
 		$comments = $this->comments;
 		$references = array();
-		
-		
+
+
 		if (!empty($comments))
 		{
 			// Extract the reference for each entry
-			// If there's reference information 
+			// If there's reference information
 			if (array_key_exists("reference", $comments))
 			{
 				// Loop over all the references
@@ -161,14 +166,14 @@ class POEntry
 				}
 			}
 		}
-		
+
 		return $references;
 	}
-	
+
 	/**
 	 * Extract the relevant part of the PO reference with respect
 	 * to the main folder of the code
-	 * 
+	 *
 	 * @param string $path The original path
 	 * @param string $folder The main folder for the code
 	 * @return string The final path
@@ -177,7 +182,7 @@ class POEntry
 	{
 		$regex = "/.+\\\\$folder\\\\(.+)/";
 		$match = array();
-		
+
 		// Determine the folder delimiter
 		if (strpos($path, '/') !== false)
 		{
@@ -189,19 +194,19 @@ class POEntry
 			if (isset($match[1]))
 				return $match[1];
 		}
-		
+
 		return '';
 	}
-	
-	
+
+
 	/**
 	 * Display the entry, in standard gettext format
 	 */
-	public function display() 
+	public function display()
 	{
 		// Display comments first
-		$comments = $this->getComments();            
-		foreach ($comments as $type => $comment) 
+		$comments = $this->getComments();
+		foreach ($comments as $type => $comment)
 		{
 			// Display comments
 			switch ($type)
@@ -230,9 +235,9 @@ class POEntry
 					{
 						if ($id === 0)
 						{
-							echo "$flag"; 
-						} 
-						else 
+							echo "$flag";
+						}
+						else
 						{
 							echo ", $flag";
 						}
@@ -250,18 +255,18 @@ class POEntry
 
 		// Context
 		$context = $this->getContext();
-		if ($context != "") 
+		if ($context != "")
 			echo "msgctxt \"" . $context . "\"\n";
 
 		// msgid
 		$source = $this->getSource();
 		echo "msgid \"$source\"\n";
 
-		// msgstr 
+		// msgstr
 		$target = $this->getTarget();
 		echo "msgstr \"$target\"\n";
 	}
-	
+
 	/**
 	 * Retrieve the entry's hash
 	 * @return string This entry's hash
