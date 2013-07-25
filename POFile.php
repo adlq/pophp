@@ -238,12 +238,20 @@ class POFile
 	 */
 	public function display($entries = array())
 	{
-	// If no entries are specified as parameter, display all of them
-	$entries = empty($entries) ? $this->entries : $entries;
-			foreach ($this->entries as $entry)
-			{
-		// Call the display() method of each entry
-		$entry->display();
-			}
+		// If no entries are specified as parameter, display all of them
+		$entries = empty($entries) ? $this->entries : $entries;
+		foreach ($entries as $entry)
+			echo $entry;
 	}
+
+	/**
+	 * Output the raw representation of the full
+	 * PO/POT file
+	 */
+	public function __toString()
+	{
+		foreach ($this->entries as $entry)
+			echo $entry;
+	}
+
 }

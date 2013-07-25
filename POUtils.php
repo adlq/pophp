@@ -38,11 +38,12 @@ class POUtils
 	 *
 	 * @param string $file1 Path to the first file
 	 * @param string $file2 Path to the second file
+	 * @param array $fromFiles List of source files to extract the entries from
 	 * @return array An array containing 2 sub arrays, indicating
 	 * entries exclusive to each file
 	 * @throws Exception
 	 */
-	public function compare($file1, $file2)
+	public function compare($file1, $file2, $fromFiles = array(), $rootFolder = '')
 	{
 		$result = array('first' => array(), 'second' => array());
 
@@ -52,13 +53,13 @@ class POUtils
 		$po1 = new POFile($file1);
 		$po2 = new POFile($file2);
 
-		$result['firstMsgCount'] = count($po1->getEntries());
-		$result['secondMsgCount'] = count($po2->getEntries());
+		$result['firstMsgCount'] = count($po1->getEntries($fromFiles, $rootFolder));
+		$result['secondMsgCount'] = count($po2->getEntries($fromFiles, $rootFolder));
 
-		$result['firstOnly'] = $this->diffEntries($po1, $po2);
-		$result['secondOnly'] = $this->diffEntries($po2, $po1);
+		$result['firstOnly'] = $this->diffEntries($po1, $po2, $fromFiles, $rootFolder);
+		$result['secondOnly'] = $this->diffEntries($po2, $po1, $fromFiles, $rootFolder);
 
-		$result['common'] = $this->commonEntries($po1, $po2);
+		$result['common'] = $this->commonEntries($po1, $po2, $fromFiles, $rootFolder);
 
 		return $result;
 	}
@@ -68,14 +69,15 @@ class POUtils
 	 *
 	 * @param POFile $po1 The first POFile
 	 * @param POFile $po2 The second POFile
+	 * @param array $fromFiles List of source files to extract the entries from
 	 * @return array The diff array, containg entries in the first POFile
 	 * but not in the second one
 	 */
-	private function diffEntries($po1, $po2)
+	private function diffEntries($po1, $po2, $fromFiles = array(), $rootFolder = '')
 	{
 		$diffArray = array();
 
-		foreach ($po1->getEntries() as $entry)
+		foreach ($po1->getEntries($fromFiles, $rootFolder) as $entry)
 		{
 			if (!$po2->getEntry($entry))
 				array_push($diffArray, $entry);
@@ -84,11 +86,19 @@ class POUtils
 		return $diffArray;
 	}
 
-	private function commonEntries($po1, $po2)
+	/**
+	 * Find common entries from 2 POFile objects
+	 *
+	 * @param POFile $po1 The first POFile
+	 * @param POFile $po2 The second POFile
+	 * @param array $fromFiles List of source files to extract the entries from
+	 * @return array The common entries
+	 */
+	private function commonEntries($po1, $po2, $fromFiles = array(), $rootFolder = '')
 	{
 		$commonArray = array();
 
-		foreach ($po1->getEntries() as $entry)
+		foreach ($po1->getEntries($fromFiles, $rootFolder) as $entry)
 		{
 			if ($po2->getEntry($entry))
 				array_push($commonArray, $entry);

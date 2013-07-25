@@ -86,6 +86,15 @@ class POEntry
 	}
 
 	/**
+	 * Retrieve the entry's hash
+	 * @return string This entry's hash
+	 */
+	public function getHash()
+	{
+		return $this->hash;
+	}
+
+	/**
 	 * Retrieve the comments associated to an entry
 	 *
 	 * @return	An array containing the entry's comments
@@ -126,16 +135,6 @@ class POEntry
 	}
 
 	/**
-	 * Modified the target string
-	 *
-	 * @param string $target The new target string
-	 */
-	public function setTarget($target)
-	{
-		$this->target = $target;
-	}
-
-	/**
 	 * Retrieve the list of references for an entry
 	 *
 	 * @param string $rootFolder The root folder
@@ -160,14 +159,24 @@ class POEntry
 					$finalReference = $this->extractRelevantReference($reference, $folder);
 					if ($finalReference !== '')
 					{
-							// Push the reference onto the result array
-							array_push($references, $finalReference);
+						// Push the reference onto the result array
+						array_push($references, $finalReference);
 					}
 				}
 			}
 		}
 
 		return $references;
+	}
+
+	/**
+	 * Modify the target string
+	 *
+	 * @param string $target The new target string
+	 */
+	public function setTarget($target)
+	{
+		$this->target = $target;
 	}
 
 	/**
@@ -198,12 +207,14 @@ class POEntry
 		return '';
 	}
 
-
 	/**
-	 * Display the entry, in standard gettext format
+	 * Display the entry, in gettext format
+	 * @return string The string representing the entry
 	 */
-	public function display()
+	public function __toString()
 	{
+		$out = '';
+
 		// Display comments first
 		$comments = $this->getComments();
 		foreach ($comments as $type => $comment)
@@ -214,40 +225,44 @@ class POEntry
 				case "translator":
 					foreach ($comment as $translatorComment)
 					{
-						echo "# $translatorComment\n";
+						$out .= "# $translatorComment\n";
 					}
 					break;
+
 				case "extracted":
 					foreach ($comment as $extracted)
 					{
-						echo "#. $extracted\n";
+						$out .= "#. $extracted\n";
 					}
 					break;
+
 				case "reference":
 					foreach ($comment as $ref)
 					{
-						echo "#: " . str_replace('/', '\\', $ref) . "\n";
+						$out .= "#: $ref\n";
 					}
 					break;
+
 				case "flag":
-					echo "#, ";
+					$out .= "#, ";
 					foreach ($comments['flag'] as $id => $flag)
 					{
 						if ($id === 0)
 						{
-							echo "$flag";
+							$out .= "$flag";
 						}
 						else
 						{
-							echo ", $flag";
+							$out .= ", $flag";
 						}
 					}
-					echo "\n";
+					$out .= "\n";
 					break;
+
 				default:
-					foreach ($comment as $old)
+					foreach ($comment as $previous)
 					{
-						echo "#| $old\n";
+						$out .= "#| $previous\n";
 					}
 					break;
 			}
@@ -255,24 +270,13 @@ class POEntry
 
 		// Context
 		$context = $this->getContext();
-		if ($context != "")
-			echo "msgctxt \"" . $context . "\"\n";
+		if ($context != '')
+			$out .= "msgctxt \"" . $context . "\"\n";
 
-		// msgid
-		$source = $this->getSource();
-		echo "msgid \"$source\"\n";
+		// Source and target
+		$out .= "msgid \"{$this->getSource()}\"\n";
+		$out .= "msgstr \"{$this->getTarget()}\"\n\n";
 
-		// msgstr
-		$target = $this->getTarget();
-		echo "msgstr \"$target\"\n";
-	}
-
-	/**
-	 * Retrieve the entry's hash
-	 * @return string This entry's hash
-	 */
-	public function getHash()
-	{
-		return $this->hash;
+		return $out;
 	}
 }
