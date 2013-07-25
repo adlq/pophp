@@ -136,7 +136,7 @@ HEADER;
 	 *
 	 * @param string $file Path to the file
 	 */
-	private function initGettextFile($file)
+	public function initGettextFile($file)
 	{
 		file_put_contents($file, $this->gettextHeader);
 	}
