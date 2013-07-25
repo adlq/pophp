@@ -141,5 +141,14 @@ HEADER;
 		file_put_contents($file, $this->gettextHeader);
 	}
 
+	/**
+	 * Return the Gettext header used to initialize PO files
+	 *
+	 * @return string The header
+	 */
+	public function getGettextHeader()
+	{
+		return $this->gettextHeader;
+	}
 }
 
