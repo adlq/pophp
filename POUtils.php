@@ -28,6 +28,30 @@ require_once('POFile.php');
 class POUtils
 {
 
+	private $gettextHeader = <<<HEADER
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: EasyquizzServer\\n"
+"Report-Msgid-Bugs-To: \\n"
+"POT-Creation-Date: 2006-09-01 18:31+0200\\n"
+"PO-Revision-Date: 2006-11-01 09:27+0100\\n"
+"Last-Translator: Bertrand Gorge <bertrand.gorge@epistema.com>\\n"
+"Language-Team: Epistema <translations@epistema.com>\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=UTF-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"X-Poedit-Language: English\\n"
+"X-Poedit-SourceCharset: utf-8\\n"
+"X-Poedit-KeywordsList: EpiLang\\n"
+"X-Poedit-Basepath: ..\\n"
+
+HEADER;
+
 	public function __construct()
 	{
 
@@ -107,12 +131,15 @@ class POUtils
 		return $commonArray;
 	}
 
-	public function printEntry($entry)
+	/**
+	 * Initiate a gettext file (header to define)
+	 *
+	 * @param string $file Path to the file
+	 */
+	private function initGettextFile($file)
 	{
-		$str = "msgid \"{$entry->getSource()}\"\n";
-		$str .= "msgstr \"{$entry->getTarget()}\"\n\n";
-
-		return $str;
+		file_put_contents($file, $this->gettextHeader);
 	}
+
 }
 
