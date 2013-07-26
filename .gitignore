@@ -5,3 +5,13 @@
 *.log
 test.php
 /nbproject/private/
+
+.buildpath
+.project
+.settings/
+addExistingTrans.*
+checkTrans*
+fromFrontToFull.php
+lastCheck.php
+sanity*
+toast.php

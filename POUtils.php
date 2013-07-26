@@ -50,6 +50,7 @@ msgstr ""
 "X-Poedit-KeywordsList: EpiLang\\n"
 "X-Poedit-Basepath: ..\\n"
 
+
 HEADER;
 
 	public function __construct()
