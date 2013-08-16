@@ -15,3 +15,6 @@ fromFrontToFull.php
 lastCheck.php
 sanity*
 toast.php
+
+# PhpStorm
+.idea/

@@ -24,10 +24,10 @@ msgstr ""
 
 HEADER;
 
+echo $out;
+
 foreach ($diff['firstOnly'] as $entry)
 {
-	$entry->setTarget('');
-	$out .= $utils->printEntry($entry);
+	//$entry->setTarget('');
+	echo($entry);
 }
-
-echo $out;

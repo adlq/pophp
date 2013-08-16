@@ -137,7 +137,7 @@ class POEntry
 	/**
 	 * Retrieve the list of references for an entry
 	 *
-	 * @param string $rootFolder The root folder
+	 * @param string $folder The root folder
 	 * @return array The list of references for the entry
 	 */
 	public function getReferences($folder)
@@ -167,6 +167,11 @@ class POEntry
 		}
 
 		return $references;
+	}
+
+	public function setReferences($refs)
+	{
+		$this->comments['reference'] = $refs;
 	}
 
 	/**

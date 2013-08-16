@@ -28,7 +28,7 @@ require_once('POFile.php');
 class POUtils
 {
 
-	private $gettextHeader = <<<HEADER
+	private static $gettextHeader = <<<HEADER
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
@@ -64,6 +64,7 @@ HEADER;
 	 * @param string $file1 Path to the first file
 	 * @param string $file2 Path to the second file
 	 * @param array $fromFiles List of source files to extract the entries from
+     * @param string $rootFolder The folder containing the source files
 	 * @return array An array containing 2 sub arrays, indicating
 	 * entries exclusive to each file
 	 * @throws Exception
@@ -95,7 +96,8 @@ HEADER;
 	 * @param POFile $po1 The first POFile
 	 * @param POFile $po2 The second POFile
 	 * @param array $fromFiles List of source files to extract the entries from
-	 * @return array The diff array, containg entries in the first POFile
+     * @param string $rootFolder The folder containing the source files
+	 * @return array The diff array, containing entries in the first POFile
 	 * but not in the second one
 	 */
 	private function diffEntries($po1, $po2, $fromFiles = array(), $rootFolder = '')
@@ -117,6 +119,7 @@ HEADER;
 	 * @param POFile $po1 The first POFile
 	 * @param POFile $po2 The second POFile
 	 * @param array $fromFiles List of source files to extract the entries from
+     * @param string $rootFolder The folder containing the source files
 	 * @return array The common entries
 	 */
 	private function commonEntries($po1, $po2, $fromFiles = array(), $rootFolder = '')
@@ -133,13 +136,13 @@ HEADER;
 	}
 
 	/**
-	 * Initiate a gettext file (header to define)
+	 * Initiate a Gettext file (header to define)
 	 *
 	 * @param string $file Path to the file
 	 */
 	public function initGettextFile($file)
 	{
-		file_put_contents($file, $this->gettextHeader);
+		file_put_contents($file, self::$gettextHeader);
 	}
 
 	/**
@@ -147,9 +150,9 @@ HEADER;
 	 *
 	 * @return string The header
 	 */
-	public function getGettextHeader()
+	public static function getGettextHeader()
 	{
-		return $this->gettextHeader;
+		return self::$gettextHeader;
 	}
 }
 
