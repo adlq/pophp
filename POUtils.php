@@ -73,11 +73,8 @@ HEADER;
 	{
 		$result = array('first' => array(), 'second' => array());
 
-		if (!file_exists($file1) || !file_exists($file2))
-			throw new Exception();
-
-		$po1 = new POFile($file1);
-		$po2 = new POFile($file2);
+		$po1 = $this->preprocessParam($file1);
+		$po2 = $this->preprocessParam($file2);
 
 		$result['firstMsgCount'] = count($po1->getEntries($fromFiles, $rootFolder));
 		$result['secondMsgCount'] = count($po2->getEntries($fromFiles, $rootFolder));
@@ -153,6 +150,28 @@ HEADER;
 	public static function getGettextHeader()
 	{
 		return self::$gettextHeader;
+	}
+
+	/**
+	 * Create and return the POFile from the
+	 * compare() parameter if necessary.
+	 *
+	 * @param string $param The parameter. Can be
+	 * a file name or a POFile object
+	 *
+	 * @return POFile
+	 * @throws RuntimeException
+	 */
+	private function preprocessParam($param)
+	{
+		if (is_string($param))
+		{
+			if (!file_exists($param))
+				throw new RuntimeException("File '$param' does not exist");
+			$pofile = new POFile($param);
+			return $pofile;
+		}
+		return $param;
 	}
 }
 
