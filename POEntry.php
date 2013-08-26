@@ -194,13 +194,13 @@ class POEntry
 	 */
 	public function extractRelevantReference($path, $folder)
 	{
-		$regex = "/.+\\\\$folder\\\\(.+)/";
+		$regex = "/.*\\*$folder\\*(.+)/";
 		$match = array();
 
 		// Determine the folder delimiter
 		if (strpos($path, '/') !== false)
 		{
-			$regex = "/.+\/$folder\/(.+)/";
+			$regex = "/.*\/*$folder\/(.+)/";
 		}
 
 		if (preg_match($regex, $path, $match))
