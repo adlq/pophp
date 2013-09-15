@@ -19,6 +19,7 @@ along with Pophp.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 require_once("POEntry.php");
+require_once('POParser.php');
 
 /**
  * @covers POEntry
@@ -31,19 +32,20 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		$this->standardEntry = new POEntry('source1', 'target');
-		$this->fuzzyEntry = new POEntry('source2', 'target', '', array('flag' => array('fuzzy')));
+		$this->standardEntry = new POEntry('source1', 'target1');
+		$this->fuzzyEntry = new POEntry('source2', 'target2', '', array(POParser::COMMENT_FLAG_KEY => array('fuzzy')));
 		$this->untranslatedEntry = new POEntry('source3', '');
 		$this->fullEntry = new POEntry('source4', 'target4', 'Context',
 			array(
-				'translator' => array('Translator comment 1', 'Translator comment 2'),
-				'extracted' => array('Extracted comment 1', 'Extracted comment 2'),
-				'reference' => array(
+				POParser::COMMENT_TRANSLATOR_KEY => array('Translator comment 1', 'Translator comment 2'),
+				POParser::COMMENT_EXTRACTED_KEY => array('Extracted comment 1', 'Extracted comment 2'),
+				POParser::COMMENT_REFERENCE_KEY => array(
 					'C:\fooz\baz\foom\foo\bar\foobar1.php:321',
 					'C:\fooz\baz\foom\foo\bar\foobar2.php:31',
 					'C:\fooz\baz\foom\foo\bar\foobar2.php:34'),
-				'flag' => array('Flag 1', 'Flag 2'),
-				'previous' => array('Previous comment 1', 'Previous comment 2')
+        POParser::COMMENT_FLAG_KEY => array('Flag 1', 'Flag 2'),
+        'msgid' => array('Previous msgid'),
+        'msgctxt' => array('Previous msgctxt'),
 			));
 	}
 
@@ -76,7 +78,7 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 	{
 		// Unix folder delimiter
 		$this->standardEntry->comments = array(
-			'reference' => array(
+			POParser::COMMENT_REFERENCE_KEY => array(
 				'/fooz/baz/foom/foo/bar/foobar1.php:123',
 				'/fooz/baz/foom/foo/bar/foobar2.php:13',
 				'/fooz/baz/foom/foo/bar/foobar2.php:134'
@@ -91,7 +93,7 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 
 		// Win folder delimiter
 		$this->standardEntry->comments = array(
-			'reference' => array(
+			POParser::COMMENT_REFERENCE_KEY => array(
 				'C:\fooz\baz\foom\foo\bar\foobar1.php:321',
 				'C:\fooz\baz\foom\foo\bar\foobar2.php:31',
 				'C:\fooz\baz\foom\foo\bar\foobar2.php:34'
@@ -105,7 +107,7 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 		), $this->standardEntry->getReferences('foom'));
 
 		// No references
-		$this->standardEntry->comments = array('reference' => array());
+		$this->standardEntry->comments = array(POParser::COMMENT_REFERENCE_KEY => array());
 
 		$this->assertEmpty($this->standardEntry->getReferences('foo'));
 	}
@@ -133,26 +135,35 @@ class POEntryTest extends PHPUnit_Framework_TestCase
 	 */
 	public function testToString()
 	{
-		$this->assertEquals($this->fuzzyEntry->__toString(), "#, fuzzy\nmsgid \"source2\"\nmsgstr \"target\"\n\n");
-		$this->assertEquals($this->untranslatedEntry->__toString(),
-		"msgid \"source3\"\nmsgstr \"\"\n\n");
+		$this->assertEquals("#, fuzzy\nmsgid \"source2\"\nmsgstr \"target2\"\n\n", $this->fuzzyEntry->__toString());
+		$this->assertEquals("msgid \"source3\"\nmsgstr \"\"\n\n", $this->untranslatedEntry->__toString());
 
-		$this->assertEquals($this->fullEntry->__toString(),
-			"# Translator comment 1\n
-			# Translator comment 2\n
-			#. Extracted comment 1\n
-			#. Extracted comment 2\n
-			#: C:\fooz\baz\foom\foo\bar\foobar1.php:321\n
-			#: C:\fooz\baz\foom\foo\bar\foobar2.php:31\n
-			#: C:\fooz\baz\foom\foo\bar\foobar2.php:34\n
-			#, Flag 1, Flag 2\n
-			#| Previous comment 1\n
-			#| Previous comment 2\n
-			msgctxt \"Context\"\n
-			msgid \"source4\"\n
-			msgstr \"target4\"\n");
-		echo $this->fullEntry;
+    $expectedFullEntryString = "# Translator comment 1\n";
+    $expectedFullEntryString .= "# Translator comment 2\n";
+    $expectedFullEntryString .= "#. Extracted comment 1\n";
+    $expectedFullEntryString .= "#. Extracted comment 2\n";
+    $expectedFullEntryString .= "#: C:\\fooz\\baz\\foom\\foo\\bar\\foobar1.php:321\n";
+    $expectedFullEntryString .= "#: C:\\fooz\\baz\\foom\\foo\\bar\\foobar2.php:31\n";
+    $expectedFullEntryString .= "#: C:\\fooz\\baz\\foom\\foo\\bar\\foobar2.php:34\n";
+    $expectedFullEntryString .= "#, Flag 1, Flag 2\n";
+    $expectedFullEntryString .= "#| msgid \"Previous msgid\"\n";
+    $expectedFullEntryString .= "#| msgctxt \"Previous msgctxt\"\n";
+    $expectedFullEntryString .= "msgctxt \"Context\"\n";
+    $expectedFullEntryString .= "msgid \"source4\"\n";
+    $expectedFullEntryString .= "msgstr \"target4\"\n\n";
+    
+    $this->assertEquals($expectedFullEntryString, $this->fullEntry->__toString());
 	}
+  
+  /**
+   * @covers POEntry::getComments
+   */
+  public function testGetComments()
+  {
+    $expectedFuzzyComments = array('flags' => array('fuzzy'));
+    $this->assertEquals($expectedFuzzyComments, $this->fuzzyEntry->getComments());
+  }
+  
 }
 
 ?>

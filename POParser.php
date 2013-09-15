@@ -27,6 +27,11 @@ class POParser
 	const STATE_MSGCTXT = 1;
 	const STATE_MSGID = 2;
 	const STATE_MSGSTR = 3;
+  
+  const COMMENT_EXTRACTED_KEY = 'extracted';
+  const COMMENT_TRANSLATOR_KEY = 'translator';
+  const COMMENT_FLAG_KEY = 'flags';
+  const COMMENT_REFERENCE_KEY = 'references';
 	
 	/**
 	 * Constructor method
@@ -132,51 +137,47 @@ class POParser
 	public function parse($file) 
 	{	
 		$regexes = array(
-		"comment" 	=> 	"/^#(.+)?\n/",
+		"comment" 	=> 	"/^#(.+)?/",
 		"quote"		=>	"/^\"(.+)?\"/",
 		"msgctxt" 	=>	"/^msgctxt \"(.*)?\"/",
 		"msgid" 	=>	"/^msgid \"(.*)?\"/",
 		"msgstr" 	=>	"/^msgstr \"(.*)?\"/");
 	
-		$lines = file($file);
-		
+		$lines = is_file($file) ? file($file) : explode("\n", $file);
 		// Iterate through all the lines
 		foreach ($lines as $line) 
 		{
 			// Preg matches
 			$match = array();
-			
+
 			if (preg_match($regexes["comment"], $line, $match) && $this->getState() !== self::STATE_OBSOLETE && isset($match[1][0])) 
 			{
 				/**
 				 * Comment parsing
 				 */
-				 
 				// Switch on the character following the #, which defines the comment type
 				switch ($match[1][0])
 				{
 					case ".":
 						// Extracted comment
-						$this->feedCommentBuffer('extracted', trim(substr($match[1], 2)));
+						$this->feedCommentBuffer(POParser::COMMENT_EXTRACTED_KEY, trim(substr($match[1], 2)));
 						break;
 					case ":":
 						// Reference
-						$this->feedCommentBuffer('reference', trim(substr($match[1], 2)));
+						$this->feedCommentBuffer(POParser::COMMENT_REFERENCE_KEY, trim(substr($match[1], 2)));
 						break;
 					case ",":
 						// Flags
 						$flags = explode(", ", substr($match[1], 2));
 						foreach ($flags as $flag)
 						{
-							$this->feedCommentBuffer('flag', trim($flag));
+							$this->feedCommentBuffer(POParser::COMMENT_FLAG_KEY, trim($flag));
 						}
 						break;
 					case "|":
 						// Previous comments
-						$attr = array();
-						preg_match("/(\w+)/", $match[1], $attr);
-						$pos = strpos($match[1], "\"");
-						$this->feedCommentBuffer('old' . ucfirst($attr[0]), trim(substr($match[1], $pos)));
+						preg_match("/(\w+)\s\"(.*)?\"/", $match[1], $attr);
+						$this->feedCommentBuffer($attr[1], $attr[2]);
 						break;
 					case "~":
 						// Obsolete comments
@@ -184,7 +185,7 @@ class POParser
 						break;
 					default:
 						// Translator comments
-						$this->feedCommentBuffer('translator', trim(substr($match[1], 1)));
+						$this->feedCommentBuffer(POParser::COMMENT_TRANSLATOR_KEY, trim(substr($match[1], 1)));
 						break;
 				}
 			}
@@ -252,10 +253,9 @@ class POParser
 				}
 			}
 		}
-		
+    
 		// Add the last entry
 		$this->updatePOEntries();
-		
-        return $this->poEntries;
+    return $this->poEntries;
 	}
 }

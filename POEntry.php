@@ -45,10 +45,10 @@ class POEntry
 		{
 			// Extract the translation state from the comment
 			// The fuzzy status is specified amongst the flags
-			if (array_key_exists('flag', $comments))
+			if (array_key_exists(POParser::COMMENT_FLAG_KEY, $comments))
 			{
 				// Examine each flag
-				foreach ($comments['flag'] as $flag)
+				foreach ($comments[POParser::COMMENT_FLAG_KEY] as $flag)
 				{
 					if (trim($flag) == 'fuzzy')
 					{
@@ -150,10 +150,10 @@ class POEntry
 		{
 			// Extract the reference for each entry
 			// If there's reference information
-			if (array_key_exists("reference", $comments))
+			if (array_key_exists(POParser::COMMENT_REFERENCE_KEY, $comments))
 			{
 				// Loop over all the references
-				foreach ($comments["reference"] as $reference)
+				foreach ($comments[POParser::COMMENT_REFERENCE_KEY] as $reference)
 				{
 					// Extract the relevant reference
 					$finalReference = $this->extractRelevantReference($reference, $folder);
@@ -171,7 +171,7 @@ class POEntry
 
 	public function setReferences($refs)
 	{
-		$this->comments['reference'] = $refs;
+		$this->comments[POParser::COMMENT_REFERENCE_KEY] = $refs;
 	}
 
 	/**
@@ -194,7 +194,7 @@ class POEntry
 	 */
 	public function extractRelevantReference($path, $folder)
 	{
-		$regex = "/.*\\*$folder\\*(.+)/";
+		$regex = "/.*\\\*$folder\\\(.+)/";
 		$match = array();
 
 		// Determine the folder delimiter
@@ -202,11 +202,11 @@ class POEntry
 		{
 			$regex = "/.*\/*$folder\/(.+)/";
 		}
-
+    
 		if (preg_match($regex, $path, $match))
 		{
 			if (isset($match[1]))
-				return $match[1];
+        return $match[1];
 		}
 
 		return '';
@@ -227,30 +227,30 @@ class POEntry
 			// Display comments
 			switch ($type)
 			{
-				case "translator":
+				case POParser::COMMENT_TRANSLATOR_KEY:
 					foreach ($comment as $translatorComment)
 					{
 						$out .= "# $translatorComment\n";
 					}
 					break;
 
-				case "extracted":
+				case POParser::COMMENT_EXTRACTED_KEY:
 					foreach ($comment as $extracted)
 					{
 						$out .= "#. $extracted\n";
 					}
 					break;
 
-				case "reference":
+				case POParser::COMMENT_REFERENCE_KEY:
 					foreach ($comment as $ref)
 					{
 						$out .= "#: $ref\n";
 					}
 					break;
 
-				case "flag":
+				case POParser::COMMENT_FLAG_KEY:
 					$out .= "#, ";
-					foreach ($comments['flag'] as $id => $flag)
+					foreach ($comments[POParser::COMMENT_FLAG_KEY] as $id => $flag)
 					{
 						if ($id === 0)
 						{
@@ -267,7 +267,7 @@ class POEntry
 				default:
 					foreach ($comment as $previous)
 					{
-						$out .= "#| $previous\n";
+						$out .= "#| $type \"$previous\"\n";
 					}
 					break;
 			}
@@ -281,7 +281,6 @@ class POEntry
 		// Source and target
 		$out .= "msgid \"{$this->getSource()}\"\n";
 		$out .= "msgstr \"{$this->getTarget()}\"\n\n";
-
 		return $out;
 	}
 }
