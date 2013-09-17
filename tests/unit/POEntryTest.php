@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 Copyright 2013 Duong Tuan Nghia
 
 This file is part of Pophp.
@@ -18,8 +18,7 @@ You should have received a copy of the GNU Lesser General Public License
 along with Pophp.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-require_once("POEntry.php");
-require_once('POParser.php');
+require_once('POUtils.php');
 
 /**
  * @covers POEntry
@@ -151,19 +150,9 @@ class POEntryTest extends PHPUnit_Framework_TestCase
     $expectedFullEntryString .= "msgctxt \"Context\"\n";
     $expectedFullEntryString .= "msgid \"source4\"\n";
     $expectedFullEntryString .= "msgstr \"target4\"\n\n";
-    
+
     $this->assertEquals($expectedFullEntryString, $this->fullEntry->__toString());
 	}
-  
-  /**
-   * @covers POEntry::getComments
-   */
-  public function testGetComments()
-  {
-    $expectedFuzzyComments = array('flags' => array('fuzzy'));
-    $this->assertEquals($expectedFuzzyComments, $this->fuzzyEntry->getComments());
-  }
-  
 }
 
 ?>

@@ -24,12 +24,12 @@ require_once("POEntry.php");
 class POFile
 {
 	private $entries;
-	private $entryHash;
+	private $entryHashTable;
 
 	/**
 	 * Constructor method
 	 *
-	 * @param	$file	the PO/POT file to construct from
+	 * @param	string $file	the PO/POT file to construct from
 	 */
 	public function __construct($file = '')
 	{
@@ -39,11 +39,7 @@ class POFile
 			$this->entries = $parser->parse($file);
 
 			foreach ($this->entries as $id => $entry)
-			{
-				// Do not forget to include msgctxt as an unique identifier together
-				// with msgid
-				$this->entryHash[$entry->getHash()] = $id;
-			}
+				$this->entryHashTable[$entry->getHash()] = $id;
 		}
 		else
 		{
@@ -51,10 +47,15 @@ class POFile
 		}
 	}
 
-	public function addEntry($entry)
+	/**
+	 * Add a POEntry to the POFile
+	 *
+	 * @param POEntry $entry
+	 */
+	public function addEntry(POEntry $entry)
 	{
 		array_push($this->entries, $entry);
-		$this->entryHash[$entry->getHash()] = count($this->entryHash) > 0 ? count($this->entryHash) - 1 : 0;
+		$this->entryHashTable[$entry->getHash()] = count($this->entryHashTable) > 0 ? count($this->entryHashTable) - 1 : 0;
 	}
 
 	/**
@@ -62,7 +63,8 @@ class POFile
 	 *
 	 * @param	$fromFiles	(Optional) Parameter to filter the entries
 	 *			with respect to the files they come from
-	 * @param string $rootFolder The root folder of the original files
+	 * @param string $rootFolder The highest folder from which the PO entries
+	 * are extracted from.
 	 * @return	An array containing the PO/POT file's entries
 	 */
     public function getEntries($fromFiles = array(), $rootFolder = '')
@@ -74,22 +76,18 @@ class POFile
 			{
 				foreach ($this->entries as $entry)
 				{
-
 					foreach ($entry->getReferences($rootFolder) as $reference)
 					{
 						// Retrieve the referenced file path
-						if (preg_match("/(.+):/", $reference, $match))
+						if (preg_match("/(.+):/", $reference, $match) && isset($match[1]))
 						{
-							if (isset($match[1]))
+							$referencePath = $match[1];
+							// If the file is included in the filter, we keep the string
+							if (in_array($referencePath, $fromFiles))
 							{
-								$referencePath = $match[1];
-								// If the file is included in the filter, we keep the string
-								if (in_array($referencePath, $fromFiles))
-								{
-									array_push($result, $entry);
-									// Break out of foreach
-									break;
-								}
+								array_push($result, $entry);
+								// Break out of foreach
+								break;
 							}
 						}
 					}
@@ -205,8 +203,8 @@ class POFile
 
 		$key = $temp->getHash();
 
-		if (array_key_exists($key, $this->entryHash))
-			return $this->entries[$this->entryHash[$key]];
+		if (array_key_exists($key, $this->entryHashTable))
+			return $this->entries[$this->entryHashTable[$key]];
 		return false;
 	}
 
@@ -225,9 +223,9 @@ class POFile
 		return false;
 	}
 
-	public function getEntryHash()
+	public function getEntryHashTable()
 	{
-		return $this->entryHash;
+		return $this->entryHashTable;
 	}
 
 	/**

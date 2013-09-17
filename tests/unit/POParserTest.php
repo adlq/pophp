@@ -1,5 +1,5 @@
 <?php
-/* 
+/*
 Copyright 2013 Duong Tuan Nghia
 
 This file is part of Pophp.
@@ -22,31 +22,26 @@ require_once('POUtils.php');
 
 class POParserTest extends PHPUnit_Framework_TestCase
 {
+	const testPo = 'tests/unit/test.po';
+
 	public function setUp()
 	{
 		$this->parser = new POParser();
 	}
-  
+
   /**
    * @covers POParser::parse()
    */
   public function testParse()
   {
-    $toParse = "# Translator comment 1\n";
-    $toParse .= "# Translator comment 2\n";
-    $toParse .= "#. Extracted comment 1\n";
-    $toParse .= "#. Extracted comment 2\n";
-    $toParse .= "#: C:\\fooz\\baz\\foom\\foo\\bar\\foobar1.php:321\n";
-    $toParse .= "#: C:\\fooz\\baz\\foom\\foo\\bar\\foobar2.php:31\n";
-    $toParse .= "#: C:\\fooz\\baz\\foom\\foo\\bar\\foobar2.php:34\n";
-    $toParse .= "#, Flag 1, Flag 2\n";
-    $toParse .= "#| msgid \"Previous msgid\"\n";
-    $toParse .= "#| msgctxt \"Previous msgctxt\"\n";
-    $toParse .= "msgctxt \"Context 1\"\n";
-    $toParse .= "msgid \"Source 1\"\n";
-    $toParse .= "msgstr \"Target 1\"\n\n";
-    
-    $expectedResult = array(new POEntry('Source 1', 'Target 1', 'Context 1',
+    $this->assertEquals(self::getEntries(), $this->parser->parse(POParserTest::testPo));
+  }
+
+	public static function getEntries()
+	{
+    return array(
+    // First entry
+    new POEntry('Source 1', 'Target 1', 'Context 1',
         array(
           POParser::COMMENT_TRANSLATOR_KEY => array('Translator comment 1', 'Translator comment 2'),
           POParser::COMMENT_EXTRACTED_KEY => array('Extracted comment 1', 'Extracted comment 2'),
@@ -57,9 +52,19 @@ class POParserTest extends PHPUnit_Framework_TestCase
           POParser::COMMENT_FLAG_KEY => array('Flag 1', 'Flag 2'),
           'msgid' => array('Previous msgid'),
           'msgctxt' => array('Previous msgctxt'),
-        )));
-    
-    $this->assertEquals($expectedResult, $this->parser->parse($toParse));
-  }
+        )),
+    // Second entry
+    new POEntry('Source 2', 'Target 2', '',
+    	array(
+    	POParser::COMMENT_REFERENCE_KEY => array('C:\fooz\baz\foom\foo\bar\foobar3.php:34'))),
+		// Third entry
+		new POEntry('Source 3', 'Fuzzy Target 3', '',
+			array(
+			POParser::COMMENT_FLAG_KEY => array('fuzzy'))),
+		// Fourth entry
+		new POEntry('Source 4', '')
+    );
+	}
+
 }
 ?>
